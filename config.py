@@ -22,9 +22,9 @@ class Config(object):
     if not CLIENT_SECRET:
         raise ValueError("Need to define CLIENT_SECRET environment variable")
 
-    AUTHORITY = "https://login.microsoftonline.com/f958e84a-92b8-439f-a62d-4f45996b6d07"
+    AUTHORITY = os.environ.get('AUTHORITY') or 'AUTHORITY'
 
-    CLIENT_ID = "5dfde336-6170-4965-8773-19dab2b2e6d9"
+    CLIENT_ID = os.environ.get('CLIENT_ID') or 'CLIENT_ID'
 
     REDIRECT_PATH = "/getAToken"
 
