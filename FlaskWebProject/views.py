@@ -1,7 +1,7 @@
 """
 Routes and views for the flask application.
 """
-
+import logging
 from flask import render_template, flash, redirect, request, session, url_for
 from urllib.parse import urlparse
 from config import Config
@@ -13,7 +13,7 @@ import msal
 import uuid
 
 imageSourceUrl = 'https://'+ app.config['BLOB_ACCOUNT']  + '.blob.core.windows.net/' + app.config['BLOB_CONTAINER']  + '/'
-
+app.logger.setLevel(logging.INFO)
 @app.route('/')
 @app.route('/home')
 @login_required
@@ -65,13 +65,14 @@ def login():
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
         if user is None or not user.check_password(form.password.data):
-            app.logger.info('Invalid username or password')
+            app.logger.error('Invalid username or password')
             flash('Invalid username or password')
             return redirect(url_for('login'))
         login_user(user, remember=form.remember_me.data)
         next_page = request.args.get('next')
         if not next_page or urlparse(next_page).netloc != '':
             next_page = url_for('home')
+        app.logger.info(user.username + ' logg-in successfully')
         return redirect(next_page)
     session["state"] = str(uuid.uuid4())
     auth_url = _build_auth_url(scopes=Config.SCOPE, state=session["state"])
@@ -95,7 +96,7 @@ def authorized():
         user = User.query.filter_by(username="admin").first()
         login_user(user)
         _save_cache(cache)
-        app.logger.info('log-in successfully')
+        app.logger.info(user.username + ' log-in successfully')
     return redirect(url_for('home'))
 
 @app.route('/logout')
